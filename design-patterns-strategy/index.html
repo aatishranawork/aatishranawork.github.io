@@ -1,0 +1,323 @@
+<!DOCTYPE html><html><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="ie=edge"/><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/><meta name="generator" content="Gatsby 5.8.1"/><style data-href="/styles.e402d274bdc63e9d6517.css" data-identity="gatsby-global-css">.Navbar-module--aatish--5eb7e{background-image:url(/static/aatish-f3443295fbaae08b8755fe96406979a7.jpeg);background-size:contain;border-radius:60px;height:120px;margin-left:auto;margin-right:auto;width:120px}nav{min-width:180px;padding:10px}.Navbar-module--blog_parent--1464e{margin-top:50px}body{color:#000;font-family:Georgia,serif;height:100vh;margin:0;overflow:hidden;padding:0;width:100vw}code{background-color:#f1f1f1;border-radius:4px;display:block;font-family:monospace;padding:10px}h1,h2,h3,h4,h5,h6{color:#505050}.Layout-module--layout_outer--ac406{display:flex;flex-direction:column;height:100vh}.Layout-module--layout_inner--60f26{display:flex;margin:0;overflow-y:auto;padding:0;width:100%}.Layout-module--content--9bbaf{margin-left:auto;margin-right:auto;width:60%}.BlogPost-module--blog--44e9c{box-shadow:0 0 10px rgba(0,0,0,.2);padding:30px 15px}</style></head><body><div id="___gatsby"><div style="outline:none" tabindex="-1" id="gatsby-focus-wrapper"><div class="Layout-module--layout_outer--ac406"><div class="Layout-module--layout_inner--60f26"><nav><a href="/"><div class="Navbar-module--aatish--5eb7e"></div><h2 style="text-align:center">Aatish Rana</h2></a><div class="Navbar-module--blog_parent--1464e"><article><a aria-current="page" class="" href="/design-patterns-strategy/"><h5>Design Pattern Strategy</h5></a></article><article><a href="/dependency-injection/"><h5>Dependency Injection</h5></a></article></div></nav><div class="Layout-module--content--9bbaf"><div class="BlogPost-module--blog--44e9c"><div><h1>Design Patterns - Strategy</h1>
+<p>In the strategy pattern, the method of a class is defined as a separate interface and concrete implementation of that interface is used depending on our need. This allows better decoupling between the method and the class that uses the method.</p>
+<p>If you don't know what Polymorphism is I would encourage you to go through that first.</p>
+<br>
+<h3>Done?</h3>
+<p>I will assume you know what polymorphism is from now on.</p>
+<p>So in polymorphism or more specifically (subtype/inclusion) polymorphism our compiler allow us to write a method that takes a class T in its argument, but will also work correctly if passed a subclass of T</p>
+<p>example:</p>
+<pre><code class="language-java">public class Application{
+  public static void main(String[] args){
+    describeAnimal(new Lion());
+    describeAnimal(new Duck());
+  }
+  
+  public static void describeAnimal(Animal animal){
+    animal.walk();
+    animal.eat();
+    animal.fly();
+  }
+}
+</code></pre>
+<p>The method describeAnimal takes 1 argument of type Animal but it will work correctly even when passed an argument of Animal's subtype (Lion, Duck, etc).</p>
+<pre><code class="language-java">public interface Animal{
+  void walk();
+  void eat();
+  void fly();
+}
+</code></pre>
+<pre><code class="language-java">public class Lion implements Animal{
+ 
+  @Override
+  public void walk(){
+    // code of animal walking on 4 legs
+  }
+  
+  @Override
+  public void eat(){
+    // code of animal eating and processing meat
+  }
+
+  @Override
+  public void fly(){
+    // this animal can't fly, handle that
+  }
+}
+</code></pre>
+<pre><code class="language-java">public class Duck implements Animal{
+ 
+  @Override
+  public void walk(){
+    // code of animal walking on 2 legs
+  }
+  
+  @Override
+  public void eat(){
+    // code of animal eating bread crumbs
+  }
+
+  @Override
+  public void fly(){
+    // code of animal flying at low altitude
+  }
+}
+</code></pre>
+<p>Now this polymorphic behavior of animal looks good but in large applications where we add more and more types of animals, because they have different types of behaviors(strategies) on how to walk, eat, fly and so on, things can go out of hands very quickly.</p>
+<p>Currently, these 2 types have completely different strategies of all 3 methods but if we add more types of animals, many of them would have all or some similarities.</p>
+<p>example:</p>
+<pre><code class="language-java">public class Monkey implements Animal{
+ 
+  @Override
+  public void walk(){
+    // code of animal walking on 2 legs
+  }
+  
+  @Override
+  public void eat(){
+    // code of animal eating banana
+  }
+
+  @Override
+  public void fly(){
+    // can not fly
+  }
+}
+</code></pre>
+<p>now monkey walks on 2 legs just like duck however it doesn't fly like the lion and at the same time, it is also vegetarian like the duck.</p>
+<p>we can add more animals, like Dragon which can eat meat, fly high and walk on 2 legs.
+or add Chimpanzee which eats a banana, cannot fly and walk on 2 legs exactly same as Monkey.</p>
+<p>Moreover, as we add more behavior to our animal class(swim, makeSound, etc), there are going be more combinations of behaviors.</p>
+<p>Naive programmers might start copy-pasting code of similar behavior in each type, or worse they might create a superclass with common behavior and start extending from them until they get stuck with maximum single inheritance feature of almost every major object-oriented language (Java, c# etc)</p>
+<p>example</p>
+<p>creating base classes for reuse</p>
+<pre><code class="language-java">public class WalkingOnTwoFeet{
+  void walk(){
+    // code of animal walking on 2 legs
+  }
+}
+public class Vegetarian{
+  void eat(){
+    // code of animal eating veg food
+  }
+}
+public class NonFlyer{
+  void fly(){
+    // empty
+  }
+}
+</code></pre>
+<p>not able to use them</p>
+<pre><code class="language-java">public class Monkey extends WalkingOnTwoFeet implements Animal{
+ 
+  @Override
+  public void walk(){
+    super.walk();
+  }
+  
+  @Override
+  public void eat(){
+    // can not extend Vegetarian
+  }
+
+  @Override
+  public void fly(){
+    // can not extend NonFlyer
+  }
+}
+</code></pre>
+<br>
+<h3>In strategy pattern, we take our behavior(walking, eating, flying) and define them in separate concrete classes and use them via an abstract interface.</h3>
+<p>First, we create interfaces for each of our behavior</p>
+<pre><code class="language-java">public interface WalkingStrategy{
+  void walk();
+}
+public interface EatingStrategy{
+  void eat();
+}
+public interface FlyingStrategy{
+  void fly();
+}
+</code></pre>
+<p>And then their concrete implementations depending on our needs.</p>
+<br>
+<p>For walking:</p>
+<pre><code class="language-java">public class WalkingOnTwoFeet implements WalkingStrategy{
+  void walk(){
+    // code of animal walking on 2 legs
+  }
+}
+</code></pre>
+<pre><code class="language-java">public class WalkingOnFourFeet implements WalkingStrategy{
+  void walk(){
+    // code of animal walking on 4 legs
+  }
+}
+</code></pre>
+<br>
+<p>For eating:</p>
+<pre><code class="language-java">public class Vegetarian implements EatingStrategy{
+  void eat(){
+    // code of animal eating veg food
+  }
+}
+</code></pre>
+<pre><code class="language-java">public class NonVegetarian implements EatingStrategy{
+  void eat(){
+    // code of animal eating non veg food
+  }
+}
+</code></pre>
+<br>
+<p>For flying:</p>
+<pre><code class="language-java">public class NonFlyer implements FlyingStrategy{
+  void fly(){
+    // empty
+  }
+}
+</code></pre>
+<pre><code class="language-java">public class LowFlyer implements FlyingStrategy{
+  void fly(){
+    // code of animal flying at low altitude
+  }
+}
+</code></pre>
+<pre><code class="language-java">public class HighFlyer implements FlyingStrategy{
+  void fly(){
+    // code of animal flying at high altitude
+  }
+}
+</code></pre>
+<br>
+<p>So now our animals would use these strategies depending on its type</p>
+<pre><code class="language-java">import WalkingOnFourFeet;
+import NonVegetarian;
+import NonFlyer;
+
+public class Lion implements Animal{
+ 
+  @Override
+  public void walk(){
+    new WalkingOnFourFeet().walk();
+  }
+  
+  @Override
+  public void eat(){
+    new NonVegetarian().eat();
+  }
+
+  @Override
+  public void fly(){
+    new NonFlyer().fly();
+  }
+}
+</code></pre>
+<p>now this example of Lion is <strong>very bad</strong> and must not be used in production code(or anywhere for that matter).</p>
+<p>As you can see the concrete implementations of each of our strategies are created inside Lion class, so we have to import them. Which means every time we want to use a new strategy for lion we have to change code inside Lion then recompile and redeploy Lion along with our new strategy.</p>
+<p><strong>Instead, we should use our abstract interfaces of strategies and inject concrete implementations through constructor injection.</strong></p>
+<p>If you don't know what Dependency Injection is and it's benefits go through it from <a href="/dependency-injection">here</a></p>
+<br>
+<p>So a better version of Lion would be</p>
+<pre><code class="language-java">import WalkingStrategy;
+import EatingStrategy;
+import FlyingStrategy;
+
+public class Lion implements Animal{
+ 
+  private WalkingStrategy walkingStrategy;
+  private EatingStrategy eatingStrategy;
+  private FlyingStrategy flyingStrategy;
+  
+  public Lion(WalkingStrategy walkingStrategy,
+              EatingStrategy eatingStrategy,
+              FlyingStrategy flyingStrategy){
+    this.walkingStrategy = walkingStrategy;
+    this.eatingStrategy = eatingStrategy;
+    this.flyingStrategy = flyingStrategy;
+  }
+  
+  @Override
+  public void walk(){
+    this.walkingStrategy.walk();
+  }
+  
+  @Override
+  public void eat(){
+    this.eatingStrategy.eat();
+  }
+
+  @Override
+  public void fly(){
+    this.flyingStrategy.fly();
+  }
+}
+</code></pre>
+<p>And when we need to create a Lion</p>
+<pre><code class="language-java">public class Application{
+  public static void main(String[] args){
+    WalkingStrategy fourFeet = new WalkingOnFourFeet();
+    EatingStrategy nonVeg = new NonVegetarian();
+    FlyingStrategy noFly = new NonFlyer();
+    
+    Animal lion = new Lion(fourFeet, nonVeg, noFly);
+  }
+}
+</code></pre>
+<br>
+<p>Same for other types of animals</p>
+<pre><code class="language-java">import WalkingStrategy;
+import EatingStrategy;
+import FlyingStrategy;
+
+public class Duck implements Animal{
+ 
+  private WalkingStrategy walkingStrategy;
+  private EatingStrategy eatingStrategy;
+  private FlyingStrategy flyingStrategy;
+  
+  public Duck(WalkingStrategy walkingStrategy,
+              EatingStrategy eatingStrategy,
+              FlyingStrategy flyingStrategy){
+    this.walkingStrategy = walkingStrategy;
+    this.eatingStrategy = eatingStrategy;
+    this.flyingStrategy = flyingStrategy;
+  }
+  
+  @Override
+  public void walk(){
+    this.walkingStrategy.walk();
+  }
+  
+  @Override
+  public void eat(){
+    this.eatingStrategy.eat();
+  }
+
+  @Override
+  public void fly(){
+    this.flyingStrategy.fly();
+  }
+}
+</code></pre>
+<pre><code class="language-java">public class Application{
+  public static void main(String[] args){
+    WalkingStrategy twoFeet = new WalkingOnTwoFeet();
+    EatingStrategy veg = new Vegetarian();
+    FlyingStrategy lowFly = new LowFlyer();
+    
+    Animal duck = new Duck(twoFeet, veg, lowFly);
+  }
+}
+</code></pre>
+<h4>That is it. That's the strategy pattern</h4>
+<h4>Conclusion</h4>
+<p>In the strategy pattern, the method(<em>walk, eat, fly</em>) of a class(<em>Animal</em>) is defined as a separate interface(<em>EatingStrategy</em>) and concrete implementation(<em>Vegetarian</em>) of that interface is used depending on our need.</p>
+<br>
+<h4>Ps.</h4>
+<p>In cases where there are no other methods and properties for Lion except for these strategies which are being injected, we don't even need a separate class "Lion" to represent it, we can just create an AnimalFactory class and it can have a method which is responsible for creating the right Lion type for us using just the Animal interface.</p>
+<p>That's <strong>Simple Factory</strong>, a topic we can discuss <a href="http://aatishrana.com/blog/design-patterns-factory">here</a>.</p></div></div></div></div></div></div><div id="gatsby-announcer" style="position:absolute;top:0;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0, 0, 0, 0);white-space:nowrap;border:0" aria-live="assertive" aria-atomic="true"></div></div><script id="gatsby-script-loader">/*<![CDATA[*/window.pagePath="/design-patterns-strategy/";/*]]>*/</script><!-- slice-start id="_gatsby-scripts-1" -->
+          <script
+            id="gatsby-chunk-mapping"
+          >
+            window.___chunkMapping="{\"app\":[\"/app-946cb9c7f4d0d2351e90.js\"],\"component---src-pages-index-js\":[\"/component---src-pages-index-js-ef98e7ca0f14de61d924.js\"],\"component---src-templates-blog-post-js\":[\"/component---src-templates-blog-post-js-e51d18df1bd04df1f85e.js\"]}";
+          </script>
+        <script>window.___webpackCompilationHash="c96c901d4d7f317abc54";</script><script src="/webpack-runtime-c80c883fc645c96beac1.js" async></script><script src="/framework-ece53a4dfa3f421a9587.js" async></script><script src="/app-946cb9c7f4d0d2351e90.js" async></script><!-- slice-end id="_gatsby-scripts-1" --></body></html>
